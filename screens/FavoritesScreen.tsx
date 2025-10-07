@@ -11,6 +11,8 @@ import { PlaceCard } from '../components/PlaceCard';
 import { EmptyState } from '../components/EmptyState';
 import { Colors } from '../constants/colors';
 import { Favorite, getFavorites, removeFavorite } from '../services/storage';
+// Import the shared utility function to calculate distance
+import { calculateDistance } from '../utils/distance';
 
 interface FavoritesScreenProps {
   userLocation: { latitude: number; longitude: number } | null;
@@ -56,24 +58,18 @@ export default function FavoritesScreen({
     );
   };
 
+  // Use the imported calculateDistance utility
   const getDistance = (place: Favorite): number => {
     if (!userLocation) return 0;
-    const R = 6371;
-    const dLat = toRad(place.latitude - userLocation.latitude);
-    const dLon = toRad(place.longitude - userLocation.longitude);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(userLocation.latitude)) *
-        Math.cos(toRad(place.latitude)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return Math.round(R * c * 10) / 10;
+    return calculateDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      place.latitude,
+      place.longitude
+    );
   };
 
-  const toRad = (degrees: number): number => {
-    return degrees * (Math.PI / 180);
-  };
+  // Removed redundant 'toRad' function as it is now inside utils/distance.ts
 
   const renderFavorite = ({ item }: { item: Favorite }) => {
     const distance = getDistance(item);
